@@ -1,0 +1,70 @@
+services:
+  - type: web
+    name: bill-generate-backend
+    runtime: node
+    plan: standard # Use at least standard plan for PDF generation
+    
+    # Build configuration
+    buildCommand: npm ci && npm run postinstall
+    startCommand: npm start
+    
+    # Environment variables for Render
+    envVars:
+      - key: NODE_ENV
+        value: production
+        scope: run,build
+      
+      - key: RENDER
+        value: "true"
+        scope: run,build
+      
+      - key: PORT
+        value: 8080
+        scope: run
+      
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: true
+        scope: run,build
+      
+      - key: MONGODB_URI
+        sync: false
+        scope: run
+      
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+        scope: run
+      
+      - key: CLOUDINARY_API_KEY
+        sync: false
+        scope: run
+      
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+        scope: run
+      
+      - key: FRONTEND_URL
+        sync: false
+        scope: run
+      
+      - key: COMPANY_PREFIX_PO
+        value: INGPO
+        scope: run
+      
+      - key: COMPANY_PREFIX_PI
+        value: INGPI
+        scope: run
+      
+      - key: COMPANY_PREFIX_INV
+        value: INGINV
+        scope: run
+      
+      - key: YEAR_RANGE
+        value: 25-26
+        scope: run
+    
+    # Ensure dependencies are built
+    buildFilter:
+      paths:
+        - package.json
+        - package-lock.json
+        - "**/*.js"
