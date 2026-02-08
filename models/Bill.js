@@ -28,6 +28,7 @@ const BillSchema = new mongoose.Schema(
     deliveryAddress: { type: String, required: true, trim: true },
     items: [ItemSchema],
     subTotal: { type: Number, required: true, min: 0 },
+    taxPercent: { type: Number, default: 0, min: 0, max: 100 },
     taxes: { type: Number, default: 0, min: 0 },
     grandTotal: { type: Number, required: true, min: 0 },
     pdfUrl: { type: String, default: "" },

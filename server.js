@@ -3,6 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
 
 // Verify environment variables at startup
 console.log("=== ENVIRONMENT VERIFICATION ===");
@@ -11,6 +12,29 @@ console.log("PUPPETEER_SKIP_CHROMIUM_DOWNLOAD:", process.env.PUPPETEER_SKIP_CHRO
 console.log("PORT:", process.env.PORT || 5000);
 console.log("MONGODB_URI:", process.env.MONGODB_URI ? "SET" : "NOT SET");
 console.log("================================");
+
+// Validate required environment variables
+const requiredEnvVars = ["MONGODB_URI"];
+const missingEnvVars = requiredEnvVars.filter((envVar) => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+  console.error(
+    `❌ ERROR: Missing required environment variables: ${missingEnvVars.join(", ")}`
+  );
+  console.error("Please add these variables to your .env file and restart the server.");
+  process.exit(1);
+}
+
+// Warn about optional but recommended variables
+const recommendedEnvVars = ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"];
+const missingRecommended = recommendedEnvVars.filter((envVar) => !process.env[envVar]);
+
+if (missingRecommended.length > 0) {
+  console.warn(
+    `⚠️  WARNING: Missing recommended environment variables: ${missingRecommended.join(", ")}`
+  );
+  console.warn("File uploads to Cloudinary will not work without these.");
+}
 
 // Warn if NODE_ENV is not set to production in deployed environment
 if (process.env.NODE_ENV !== "production" && process.env.HOME === "/home/render") {
@@ -21,11 +45,23 @@ if (process.env.NODE_ENV !== "production" && process.env.HOME === "/home/render"
 const billRoutes = require("./routes/billRoutes");
 const bankRoutes = require("./routes/bank.routes");
 const companyRoutes = require("./routes/company.routes");
+const termsRoutes = require("./routes/terms.routes");
 const errorHandler = require("./middleware/errorHandler");
 
 const app = express();
 
-// Security middleware
+// Security middleware - Helmet for HTTP headers security
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow Cloudinary resources
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+}));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -105,6 +141,7 @@ app.use((req, res, next) => {
 app.use("/api/bills", billRoutes);
 app.use("/api/bank-details", bankRoutes);
 app.use("/api/companies", companyRoutes);
+app.use("/api/terms", termsRoutes);
 
 // Root route
 app.get("/", (req, res) => {

@@ -24,12 +24,11 @@ const createBankDetail = asyncHandler(async (req, res) => {
       !bankName ||
       !accountName ||
       !accountNumber ||
-      !ifscCode ||
-      !swiftCode
+      !ifscCode
     ) {
       return res.status(400).json({
         error:
-          "Bank name, account name, account number, IFSC code, SWIFT code, branch name, and branch address are required",
+          "Bank name, account name, account number, and IFSC code are required. Swift code and branch details are optional.",
       });
     }
     console.log("Creating bank detail with data:", req.body);
@@ -49,10 +48,10 @@ const createBankDetail = asyncHandler(async (req, res) => {
       bankName: bankName.trim(),
       accountName: accountName.trim(),
       accountNumber: accountNumber.trim(),
-      ifscCode: ifscCode.toUpperCase(), // Corrected field name
-      swiftCode: swiftCode.trim().toUpperCase(),
-      branchName: branchName,
-      branchAddress: branchAddress,
+      ifscCode: ifscCode.toUpperCase(),
+      swiftCode: swiftCode ? swiftCode.trim().toUpperCase() : "",
+      branchName: branchName || "",
+      branchAddress: branchAddress || "",
       isActive: req.body.isActive !== undefined ? req.body.isActive : true,
     });
 

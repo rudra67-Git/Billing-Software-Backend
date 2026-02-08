@@ -402,6 +402,14 @@ const createBill = asyncHandler(async (req, res) => {
 
   const taxPercent =
     payload.taxPercent != null ? parseFloat(payload.taxPercent) : 0;
+  
+  // Validate tax percent
+  if (isNaN(taxPercent) || taxPercent < 0 || taxPercent > 100) {
+    return res.status(400).json({
+      error: "Tax percent must be a number between 0 and 100",
+    });
+  }
+  
   const taxes = parseFloat(((subTotal * taxPercent) / 100).toFixed(2));
   const grandTotal = parseFloat((subTotal + taxes).toFixed(2));
 
